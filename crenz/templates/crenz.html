@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>C-Renz: A DNS Tool</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	</head>
+	<body>
+		<div class="container">
+			<div class="jumbotron">
+        <h1>C-Renz:
+          <small>A DNS Tool</small></h1>
+
+				ver.0.0.1
+			</div>
+      <form action="{{ pd.action }}" method="POST">
+				<div class="form-group">
+					<label for="authns">Authoritative Name Server to check</label>
+          <input type="text" class="form-control" id="authns" name="authns" placeholder="a12-65.akam.net." value="{{ pd.authns }}">
+				</div>
+				<div class="form-group">
+					<label for="zone">Zone <span class="text-muted">(Optional)</span></label>
+          <input type="text" class="form-control" id="zone" name="zone" placeholder="myexample.com" value="{{ pd.zone }}">
+				</div>
+				<div class="form-group">
+					<label for="zonefile">Zone File Text</label>
+          <textarea rows="20" class="form-control" id="zonefile" name="zonefile" placeholder="">{{pd.zonefile}}</textarea>
+				</div>
+				<button type="submit" class="btn btn-primary">Submit</button>
+			</form>
+
+			<hr>
+			<h2>Console</h2>
+      <pre>{{ pd.console }}</pre>
+
+
+      <h2>Table</h2>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Result</th>
+            <th>Zone File</th>
+            <th>Query Answer</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!--
+          <tr class="success">
+            <td>OK!</td>
+            <td>www 1800 IN A 10.20.30.40</td>
+            <td>www.myexample.com. 1800 IN A 10.20.30.40</td>
+          </tr>
+          <tr class="danger">
+            <td>NG!</td>
+            <td>www 900 IN A 10.20.30.50</td>
+            <td>www.myexample.com. 1800 IN A 10.20.30.50</td>
+          </tr>
+          -->
+        {% for r in pd.table %}
+          {% if r[0] %}
+          <tr class="success">
+            <td>OK!</td>
+          {% else %}
+          <tr class="danger">
+            <td>NG!</td>
+          {% endif %}
+          <td> {{ r[1] }}</td>
+          <td> {{ r[2] }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+
+
+
+
+			<hr>
+			<p>
+			Feedback to mkitamur@akamai.com
+			</p>
+		</div>
+	</body>
+</html>
+
+
