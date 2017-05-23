@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Page Title</title>
+  </head>
+  <body>
+
+    <h1 id="demo">"This is a Heading</h1>
+    <p>This is a paragraph.</p>
+    <button type="button" onclick="loadDoc()">Change Content</button>
+
+  <script>
+    function loadDoc(){
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          document.getElementById("demo").innerHTML = this.responseText;
+        }
+      };
+      xhttp.open("GET", "http://127.0.0.1:5000/api/hello/", true);
+      xhttp.send();
+      return false;
+    }
+
+    //making the table
+    var tbl = document.createElement("TABLE");
+    tbl.setAttribute("id", "rettbl");
+
+    var jsontxt = '[{"age": 12345, "name": "Masa"}]';
+    var jsonobj = JSON.parse(jsontxt);
+    //console.log(JSON.stringify(jsonobj));
+    console.log( jsonobj.length );
+
+   
+
+    var r;
+    r = document.createElement("TR");
+    var col;
+    col = document.createElement("TD");
+    var data;
+    var i;
+    for(i=0; i<3; i++){
+      data = document.createTextNode("test"+i);
+      col.appendChild(data);
+    }
+    r.appendChild(col);
+    tbl.appendChild(r);
+
+    document.getElementById("demo").appendChild(tbl);
+    //document.getElementById("demo").appendChild(data);
+
+
+  </script>
+  </body>
+</html>
+
+
+
+
+

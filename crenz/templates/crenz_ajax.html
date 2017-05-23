@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>C-Renz: A DNS Tool</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	</head>
+	<body>
+		<div class="container">
+			<div class="jumbotron">
+        <h1>C-Renz:
+          <small>A DNS Tool</small></h1>
+				ver.0.0.2
+			</div>
+      <form id="mainform" method="POST" onsubmit="return false;">
+				<div class="form-group">
+					<label for="authns">Name Server to be checked out</label>
+          <input type="text" class="form-control" id="authns" name="authns" placeholder="a12-65.akam.net." value="{{ pd.authns }}">
+				</div>
+				<div class="form-group">
+					<label for="zone">Zone <span class="text-muted">(Optional)</span></label>
+          <input type="text" class="form-control" id="zone" name="zone" placeholder="myexample.com" value="{{ pd.zone }}">
+				</div>
+				<div class="form-group">
+					<label for="zonefile">Zone File Text</label>
+          <textarea rows="20" class="form-control" id="zonefile" name="zonefile" placeholder="">{{pd.zonefile}}</textarea>
+				</div>
+				<button type="submit" class="btn btn-primary" onclick="postform()">Submit</button>
+			</form>
+
+			<hr>
+      <button class="btn btn-info" data-toggle="collapse" data-target="#console">Console</button>
+      <pre id="console" class="collapse">{{ pd.console }}</pre>
+
+
+      <h2>Result</h2>
+      
+      <ul class="nav nav-tabs">
+        <li class="active"><a data-toggle="tab" href="#rettable">table</a></li>
+        <li><a data-toggle="tab" href="#retjson">json</a></li>
+        <li><a data-toggle="tab" href="#retcsv">csv</a></li>
+        <!--
+        <li><a data-toggle="tab" href="#rettxt">txt</a></li>
+        -->
+      </ul>
+      <div class="tab-content">
+        <div id="rettable" class="tab-pane fade in active">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Result</th>
+                <th>Zone File</th>
+                <th id="queryAnswer">Query Answer</th>
+              </tr>
+            </thead>
+            <tbody id="tablebody">
+              <!--
+              <tr class="success">
+                <td>OK!</td>
+                <td>www 1800 IN A 10.20.30.40</td>
+                <td>www.myexample.com. 1800 IN A 10.20.30.40</td>
+              </tr>
+              <tr class="danger">
+                <td>NG!</td>
+                <td>www 900 IN A 10.20.30.50</td>
+                <td>www.myexample.com. 1800 IN A 10.20.30.50</td>
+              </tr>
+              -->
+              {% for r in pd.table %}
+              {% if r[0] %}
+              <tr class="success">
+                <td>OK!</td>
+                {% else %}
+                <tr class="danger">
+                  <td>NG!</td>
+                  {% endif %}
+                  <td> {{ r[1] }}</td>
+                  <td> {{ r[2] }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div id="retjson" class="tab-pane fade">
+            retjson
+            <code>
+            foo
+            bar;
+            </code>
+          </div>
+          <div id="retcsv" class="tab-pane fade">
+          </div>
+          <!--
+          <div id="rettxt" class="tab-pane fade">
+          </div>
+          -->
+        </div>
+
+
+        <hr>
+
+        <footer class="footer">
+        <div class="container">
+          <p class="text-muted">Feedback to mkitamur@akamai.com</p>
+        </div>
+        </footer>
+      </div>
+
+      <script>
+        function makeTable(resObj){
+          var i;
+          var row;
+          var col;
+          var txt;
+
+          //clear table
+          var tablebody = document.getElementById("tablebody");
+          while(tablebody.hasChildNodes() ){
+            tablebody.removeChild( tablebody.firstChild );
+          }
+
+          // build table content
+          for(i=0; i<resObj.length; i++){
+            row = document.createElement("TR");
+
+            col = document.createElement("TD");
+            if(resObj[i][0] == true){
+              txt = document.createTextNode("OK");
+              row.setAttribute("class", "success");
+            }
+            else if (resObj[i][0] == false){
+              txt = document.createTextNode("NG");
+              row.setAttribute("class", "danger");
+            }
+            col.appendChild(txt);
+            row.appendChild(col);
+
+            col = document.createElement("TD");
+            txt = document.createTextNode(resObj[i][1]);
+            col.appendChild(txt);
+            row.appendChild(col);
+
+            col = document.createElement("TD");
+            txt = document.createTextNode(resObj[i][2]);
+          col.appendChild(txt);
+          row.appendChild(col);
+          tablebody.appendChild(row);
+        }
+      }
+
+      function toCSV(resObj){
+        var i;
+        var ret= new String();
+        for(i=0; i<resObj.length; i++){
+          ret += resObj[i][0] + ', ';
+          ret += resObj[i][1] + ', ';
+          ret += resObj[i][2] + '\n';
+        }
+        return ret;
+      }
+
+      function postform(){
+        var req = new XMLHttpRequest();
+        req.onreadystatechange = function(){
+          if (this.readyState == 1 || this.readyState == 2 || this.readyState==3){
+            document.getElementById("console").innerHTML = "Loading ...";
+          }
+          else if (this.readyState == 4 && this.status == 200) {
+            document.getElementById("console").innerHTML = this.responseText;
+            var responseJson = JSON.parse(this.responseText);
+            makeTable(responseJson.table);
+            document.getElementById("queryAnswer").innerHTML = "Query Answer (" + responseJson.authns + ")";
+
+
+            var retjsonDiv = document.getElementById("retjson");
+            while(retjsonDiv.hasChildNodes() ){
+              retjsonDiv.removeChild( retjsonDiv.firstChild );
+            }
+            var codeblock = document.createElement("pre");
+            var retjsoncode = document.createElement("code");
+            var jsontxt = document.createTextNode(JSON.stringify(responseJson.table, null, '  '));
+            retjsoncode.appendChild(jsontxt);
+            codeblock.appendChild(retjsoncode);
+            retjsonDiv.appendChild(codeblock);
+
+            var retcsvDiv = document.getElementById("retcsv");
+            while(retcsvDiv.hasChildNodes() ){
+              retcsvDiv.removeChild( retcsvDiv.firstChild );
+            }
+            codeblock = document.createElement("pre");
+            var retcsvcode = document.createElement("code");
+            var txtcsv = document.createTextNode(toCSV(responseJson.table));
+            retcsvcode.appendChild(txtcsv);
+            codeblock.appendChild(retcsvcode);
+            retcsvDiv.appendChild(codeblock);
+
+          }
+        };
+        //req.open("POST", "/test/", true);
+        req.open("POST", "/", true);
+        req.send(new FormData( document.getElementById("mainform")));
+      }
+    </script>
+	</body>
+</html>
+
+
