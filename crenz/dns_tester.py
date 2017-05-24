@@ -87,7 +87,7 @@ class DnsTester(object):
       self.zonename = self.zone.origin.to_text()
     if self.zonename is None:
       raise Exception('zonename is not valid: {}'.format(self.zonename))
-    print('zonename=', self.zonename)
+    #print('zonename=', self.zonename)
     self.init_resolver()
 
   def init_resolver(self):
@@ -101,7 +101,7 @@ class DnsTester(object):
     else:
       authns_ip = self.resolv_ns(self.authns)
     self.resolver.nameservers = [authns_ip]
-    print('authns_ip={}'.format(authns_ip)) 
+    #print('authns_ip={}'.format(authns_ip)) 
 
   def get_query_answer(self, name, rdtype):
     '''
@@ -111,7 +111,7 @@ class DnsTester(object):
     origin = dns.name.Name( self.zonename.split('.') )
 
     qname = name.derelativize(origin)
-    print('name={}, type={} to NS={}'.format(qname.to_text(), dns.rdatatype.to_text(rdtype), self.resolver.nameservers) )
+    #print('name={}, type={} to NS={}'.format(qname.to_text(), dns.rdatatype.to_text(rdtype), self.resolver.nameservers) )
     ans = self.resolver.query(qname, rdtype)
     return ans.rrset
 
@@ -145,7 +145,7 @@ class DnsTester(object):
     try:
       qr = self.get_query_answer(name, rdataset.rdtype)
     except Exception as err:
-      print(err)
+      #print(err)
       qr = dns.rdataset.Rdataset(rdataset.rdclass, rdataset.rdtype)
 
     zr = rdataset
