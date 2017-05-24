@@ -67,15 +67,15 @@ def index2():
 @app.route('/test/', methods=['POST'])
 def post2():
   pagedata={}
-  pagedata['authns']=request.form['authns']
-  pagedata['zone']=request.form['zone']
+  pagedata['authns']=request.form['authns'].strip()
+  pagedata['zone']=request.form['zone'].strip()
   pagedata['zonefile']=request.form['zonefile']
   pagedata['action'] = '/'
   
   try:
     zonename=None
-    if request.form['zone'] != '':
-      zonename = request.form['zone']
+    if pagedata['zone'] != '':
+      zonename = pagedata['zone']
     dt = DnsTester( request.form['authns'], zonename)
     dt.load_txt( pagedata['zonefile'].replace('\r\n', '\n') )
     #pagedata['console']='done'
@@ -91,6 +91,6 @@ def post2():
   return json.dumps(pagedata)
 
 if __name__ == "__main__":
-  app.run(host='0.0.0.0', port=80,debug = True)
+  app.run(host='0.0.0.0', port=5000,debug = True)
 
 

@@ -21,7 +21,7 @@
           <input type="text" class="form-control" id="authns" name="authns" placeholder="a12-65.akam.net." value="{{ pd.authns }}">
 				</div>
 				<div class="form-group">
-					<label for="zone">Zone <span class="text-muted">(Optional)</span></label>
+          <label for="zone">Zone <!-- <span class="text-muted">(Optional)</span> --> </label>
           <input type="text" class="form-control" id="zone" name="zone" placeholder="myexample.com" value="{{ pd.zone }}">
 				</div>
 				<div class="form-group">
@@ -51,6 +51,7 @@
           <table class="table table-striped">
             <thead>
               <tr>
+                <th>No. </th>
                 <th>Result</th>
                 <th>Zone File</th>
                 <th id="queryAnswer">Query Answer</th>
@@ -117,9 +118,16 @@
             tablebody.removeChild( tablebody.firstChild );
           }
 
+          var cnt_rr_zone=0;
+          var cnt_rr_query=0;
           // build table content
           for(i=0; i<resObj.length; i++){
             row = document.createElement("TR");
+            
+            col = document.createElement("TD");
+            txt = document.createTextNode(i+1);
+            col.appendChild(txt);
+            row.appendChild(col);
 
             col = document.createElement("TD");
             if(resObj[i][0] == true){
@@ -137,69 +145,92 @@
             txt = document.createTextNode(resObj[i][1]);
             col.appendChild(txt);
             row.appendChild(col);
+            if(resObj[i][1] != '-'){
+              cnt_rr_zone++;
+            }
 
             col = document.createElement("TD");
             txt = document.createTextNode(resObj[i][2]);
-          col.appendChild(txt);
+            col.appendChild(txt);
+            row.appendChild(col);
+            if(resObj[i][2] != '-'){
+              cnt_rr_query++;
+            }
+            
+            
+            tablebody.appendChild(row);
+          }
+          row = document.createElement("TR");
+            
+          col = document.createElement("TD");
+          row.appendChild(col);
+          col = document.createElement("TD");
+          row.appendChild(col);
+          
+          col = document.createElement("TD");
+          col.innerHTML = "<strong>"+ cnt_rr_zone +" records on Zone File</strong>";
+          row.appendChild(col);
+          
+          col = document.createElement("TD");
+          col.innerHTML = "<strong>"+ cnt_rr_query +" records from Query Answer</strong>";
           row.appendChild(col);
           tablebody.appendChild(row);
         }
-      }
 
-      function toCSV(resObj){
-        var i;
-        var ret= new String();
-        for(i=0; i<resObj.length; i++){
-          ret += resObj[i][0] + ', ';
-          ret += resObj[i][1] + ', ';
-          ret += resObj[i][2] + '\n';
+        function toCSV(resObj){
+          var i;
+          var ret= new String();
+          for(i=0; i<resObj.length; i++){
+            ret += resObj[i][0] + ', ';
+            ret += resObj[i][1] + ', ';
+            ret += resObj[i][2] + '\n';
+          }
+          return ret;
         }
-        return ret;
-      }
 
-      function postform(){
-        var req = new XMLHttpRequest();
-        req.onreadystatechange = function(){
-          if (this.readyState == 1 || this.readyState == 2 || this.readyState==3){
-            document.getElementById("console").innerHTML = "Loading ...";
-          }
-          else if (this.readyState == 4 && this.status == 200) {
-            document.getElementById("console").innerHTML = this.responseText;
-            var responseJson = JSON.parse(this.responseText);
-            makeTable(responseJson.table);
-            document.getElementById("queryAnswer").innerHTML = "Query Answer (" + responseJson.authns + ")";
-
-
-            var retjsonDiv = document.getElementById("retjson");
-            while(retjsonDiv.hasChildNodes() ){
-              retjsonDiv.removeChild( retjsonDiv.firstChild );
+        function postform(){
+          var req = new XMLHttpRequest();
+          req.onreadystatechange = function(){
+            if (this.readyState == 1 || this.readyState == 2 || this.readyState==3){
+              document.getElementById("console").innerHTML = "Loading ...";
             }
-            var codeblock = document.createElement("pre");
-            var retjsoncode = document.createElement("code");
-            var jsontxt = document.createTextNode(JSON.stringify(responseJson.table, null, '  '));
-            retjsoncode.appendChild(jsontxt);
-            codeblock.appendChild(retjsoncode);
-            retjsonDiv.appendChild(codeblock);
+            else if (this.readyState == 4 && this.status == 200) {
+              document.getElementById("console").innerHTML = this.responseText;
+              var responseJson = JSON.parse(this.responseText);
+              makeTable(responseJson.table);
+              document.getElementById("queryAnswer").innerHTML = "Query Answer (" + responseJson.authns + ")";
 
-            var retcsvDiv = document.getElementById("retcsv");
-            while(retcsvDiv.hasChildNodes() ){
-              retcsvDiv.removeChild( retcsvDiv.firstChild );
+
+              var retjsonDiv = document.getElementById("retjson");
+              while(retjsonDiv.hasChildNodes() ){
+                retjsonDiv.removeChild( retjsonDiv.firstChild );
+              }
+              var codeblock = document.createElement("pre");
+              var retjsoncode = document.createElement("code");
+              var jsontxt = document.createTextNode(JSON.stringify(responseJson.table, null, '  '));
+              retjsoncode.appendChild(jsontxt);
+              codeblock.appendChild(retjsoncode);
+              retjsonDiv.appendChild(codeblock);
+
+              var retcsvDiv = document.getElementById("retcsv");
+              while(retcsvDiv.hasChildNodes() ){
+                retcsvDiv.removeChild( retcsvDiv.firstChild );
+              }
+              codeblock = document.createElement("pre");
+              var retcsvcode = document.createElement("code");
+              var txtcsv = document.createTextNode(toCSV(responseJson.table));
+              retcsvcode.appendChild(txtcsv);
+              codeblock.appendChild(retcsvcode);
+              retcsvDiv.appendChild(codeblock);
+
             }
-            codeblock = document.createElement("pre");
-            var retcsvcode = document.createElement("code");
-            var txtcsv = document.createTextNode(toCSV(responseJson.table));
-            retcsvcode.appendChild(txtcsv);
-            codeblock.appendChild(retcsvcode);
-            retcsvDiv.appendChild(codeblock);
-
-          }
-        };
-        //req.open("POST", "/test/", true);
-        req.open("POST", "/", true);
-        req.send(new FormData( document.getElementById("mainform")));
-      }
-    </script>
-	</body>
-</html>
+          };
+          //req.open("POST", "/test/", true);
+          req.open("POST", "/", true);
+          req.send(new FormData( document.getElementById("mainform")));
+        }
+      </script>
+    </body>
+  </html>
 
 
