@@ -122,6 +122,9 @@ class DnsTester(object):
       if rdtype == dns.rdatatype.NS:
         ans = self.resolver.query(qname, rdtype, raise_on_no_answer=False)
         return ans.response.authority[0]
+      elif rdtype == dns.rdatatype.A:
+        ans = self.resolver.query(qname, rdtype, raise_on_no_answer=False)
+        return ans.response.additional[0]
       raise Exception
     return ans.rrset
 
