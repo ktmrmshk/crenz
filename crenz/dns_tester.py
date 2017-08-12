@@ -34,7 +34,7 @@ import dns.resolver
 import dns.zone
 import dns.rdatatype
 import dns.name
-import dns.rdatatype
+import dns.rdatatype, dns.rdtypes
 import dns.rdataclass
 import sys
 import copy
@@ -112,7 +112,17 @@ class DnsTester(object):
 
     qname = name.derelativize(origin)
     #print('name={}, type={} to NS={}'.format(qname.to_text(), dns.rdatatype.to_text(rdtype), self.resolver.nameservers) )
-    ans = self.resolver.query(qname, rdtype)
+    if rdtype == dns.rdatatype.NS:
+      pass
+    
+    #ans = self.resolver.query(qname, rdtype, raise_on_no_answer=False)
+    try:
+      ans = self.resolver.query(qname, rdtype)
+    except Exception as err:
+      if rdtype == dns.rdatatype.NS:
+        ans = self.resolver.query(qname, rdtype, raise_on_no_answer=False)
+        return ans.response.authority[0]
+      raise Exception
     return ans.rrset
 
   def zone_check(self):
