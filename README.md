@@ -11,6 +11,59 @@ Simply, C-renz compares the DNS resource records between zone file and query ans
 
 ![fig1](./doc/pastedImage_2.png)
 
+## Installation
+
+Easiest way is to build docker image from this source.
+
+### 1. Install [Docker](https://www.docker.com) 
+
+### 2. Get code from git repo
+
+```
+$ git clone https://github.com/ktmrmshk/crenz.git
+```
+
+### 3. Build Docker image
+
+```
+$ cd crenz/docker
+$ ls
+Dockerfile
+
+$ docker build -t sdtool/crenz . 
+...
+Successfully tagged sdtool/crenz:latest
+
+$ docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+sdtool/crenz        latest              4316b746bc5c        14 seconds ago      240MB
+```
+
+### 4. Run docker
+
+Mapping port number localhost:5001 => docker container:5000
+
+```
+$ docker run --rm -d -p5001:5000 sdtool/crenz
+
+$ docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                                NAMES
+3d00951443d8        sdtool/crenz        "gunicorn -b 0.0.0.0…"   About an hour ago   Up About an hour    0.0.0.0:5001->5000/tcp               stupefied_frankli 
+```
+
+### 5. Open in browser
+
+Access to `http://localhost:5001`
+
+
+### 6. Shutdown
+
+```
+$ docker stop 3d00951443d8
+```
+
+
+
 ## Usage
 
 Very easy to use:
