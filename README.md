@@ -26,11 +26,12 @@ $ git clone https://github.com/ktmrmshk/crenz.git
 ### 3. Build Docker image
 
 ```
-$ cd crenz/docker
+$ cd crenz
 $ ls
-Dockerfile
+LICENSE			README.md		doc			requirements.txt
+Procfile		crenz			docker			tests
 
-$ docker build -t sdtool/crenz . 
+$ docker build -t sdtool/crenz -f docker/Dockerfile .
 ...
 Successfully tagged sdtool/crenz:latest
 
